@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Uplaod</title>
+</head>
+<body>
+<h1 align="center">FAQ File Upload</h1>
+<br><br>
+<form method="post" action="index.php" enctype="multipart/form-data">  
+  File: <input type="file" name="file_name" >
+  
+  <br><br>
+
+  <input type="hidden"  name="FAQ_id" value="fid">
+  
+ 
+  Remarks: <input type="text" name="remarks" placeholder="Enter the remarks">
+  
+  <br><br>
+  <input type="submit" name="submit" value="Submit">  
+  <br><br>
+</form>
+
+
+<!-- database code -->
+
+<?php
+if(isset($_POST['submit'])) {
+
+$remarks = $_POST['remarks'];
+$fid = $_POST['FAQ_id'];
+ 
+
+if(isset($_FILES['file_name']['name'])) {
+$filename = $_FILES['file_name']['name'];
+$ext = explode(".", $filename);
+$cn = count($ext);
+if($ext[$cn-1] == 'jpg' || $ext[$cn-1] == 'jpeg' || $ext[$cn-1] == 'png' || $ext[$cn-1] == 'pdf') {
+
+$temp = $_FILES['file_name']['tmp_name'];
+move_uploaded_file($temp, "file/" .$filename);
+
+
+$conn =  mysqli_connect("localhost", "root", "", "file-upload");
+
+$id = $_GET['id'];
+$result = "INSERT INTO uploads SET FAQ_id='$fid', remarks='$remarks', file_name='$filename' ";
+
+$conn->query($result);
+echo "Files uploaded successfully";
+} else {
+echo "Only png, jpg, jpeg and pdf files are allowed";
+}
+}
+
+
+}
+?>
+
+<!-- display -->
+
+
+<table width="80%" border="1">
+    <tr>
+    <td>ID</td>
+    <td>FAQ ID</td>
+    <td>File Name</td>
+    <td>Remarks</td>
+    <td>Actions</td>
+    </tr>
+    <?php
+    $con = mysqli_connect("localhost", "root", "", "file-upload");
+ $sql="SELECT * FROM uploads";
+ $result_set = mysqli_query( $con, $sql);
+// $result = mysqli_num_rows($result_set);
+ while($row = mysqli_fetch_assoc($result_set))
+ {
+  ?>
+        <tr>
+        <td><?php echo $row['id'] ?></td>
+        <td><?php echo $row['FAQ_id'] ?></td>
+        <td><a href="file/<?php echo $row['file_name'] ?>" target="_blank">view file</a></td>
+        <td><?php echo $row['remarks'] ?></td>
+        </tr>
+        <?php
+ }
+ ?>
+</table>
+</body>
+</html>
